@@ -1,2 +1,2 @@
 # LSFoundation
-Useful code shared across all projetcs
+Useful code shared across all projects
