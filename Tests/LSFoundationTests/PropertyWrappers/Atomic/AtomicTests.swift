@@ -1,10 +1,3 @@
-//
-//  AtomicTests.swift
-//  
-//
-//  Created by Алексей Филиппов on 20.06.2023.
-//
-
 // Apple
 import XCTest
 // SPM

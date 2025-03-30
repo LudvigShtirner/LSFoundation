@@ -1,10 +1,3 @@
-//
-//  String+Flags.swift
-//
-//
-//  Created by Алексей Филиппов on 29.09.2024.
-//
-
 import Foundation
 
 public extension String {

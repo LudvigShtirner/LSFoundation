@@ -1,10 +1,3 @@
-//
-//  BundleLocaleTests.swift
-//  
-//
-//  Created by Алексей Филиппов on 25.02.2023.
-//
-
 // SPM
 import LSFoundation
 // Apple

@@ -1,10 +1,3 @@
-//
-//  CGRectCalculationsTests.swift
-//
-//
-//  Created by Алексей Филиппов on 29.09.2024.
-//
-
 // Apple
 import XCTest
 

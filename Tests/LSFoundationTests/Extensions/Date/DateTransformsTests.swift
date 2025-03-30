@@ -1,10 +1,3 @@
-//
-//  DateTransformsTests.swift
-//  
-//
-//  Created by Алексей Филиппов on 05.08.2022.
-//
-
 // Apple
 import XCTest
 

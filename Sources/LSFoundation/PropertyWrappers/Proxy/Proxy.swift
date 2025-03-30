@@ -1,10 +1,3 @@
-//
-//  Proxy.swift
-//
-//
-//  Created by Алексей Филиппов on 22.11.2023.
-//
-
 // Apple
 import Foundation
 

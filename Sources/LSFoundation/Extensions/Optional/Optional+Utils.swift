@@ -1,10 +1,3 @@
-//
-//  Optional+Utils.swift
-//
-//
-//  Created by Алексей Филиппов on 17.08.2024.
-//
-
 // Apple
 import Foundation
 

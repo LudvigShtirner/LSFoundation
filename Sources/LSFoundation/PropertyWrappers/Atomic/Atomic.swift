@@ -1,10 +1,3 @@
-//
-//  Atomic.swift
-//  
-//
-//  Created by Алексей Филиппов on 18.06.2023.
-//
-
 // Apple
 import Foundation
 

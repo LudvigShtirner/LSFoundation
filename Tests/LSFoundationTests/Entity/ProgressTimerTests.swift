@@ -1,15 +1,7 @@
-//
-//  ProgressTimerTests.swift
-//
-//
-//  Created by Алексей Филиппов on 20.07.2024.
-//
-
 // SPM
 import LSFoundation
 // Apple
 import XCTest
-import Combine
 
 final class ProgressTimerTests: XCTestCase {
     // MARK: - Tests
@@ -17,11 +9,27 @@ final class ProgressTimerTests: XCTestCase {
         // Given
         let environment = Environment()
         let sut = environment.makeSut()
+        let expectation = expectation(description: #function)
         // When
-        XCTAssertFalse(sut.isActive)
-        sut.start(updateStep: 0.1, finishTime: 0.3, handle: { _ in })
+        Task {
+            let isActive = await sut.isActive
+            XCTAssertFalse(isActive)
+            do {
+                try await sut.start(
+                    updateStep: 0.1,
+                    finishTime: 0.3,
+                    handle: { _ in }
+                )
+            } catch let error {
+                XCTFail(error.localizedDescription)
+            }
+            environment.isActive = await sut.isActive
+            XCTAssertTrue(environment.isActive)
+            expectation.fulfill()
+        }
         // Then
-        XCTAssertTrue(sut.isActive)
+        wait(for: [expectation], timeout: 1)
+        XCTAssertTrue(environment.isActive)
     }
     
     func test_progressTimer_start_avoidRepeatedStart() {
@@ -30,28 +38,38 @@ final class ProgressTimerTests: XCTestCase {
         let sut = environment.makeSut()
         let expectation = expectation(description: #function)
         // When
-        sut.start(updateStep: 0.1,
-                  finishTime: 0.3) { notifier in
-            notifier.sink { _ in
-                if environment.isFirstTimerCalledOnce {
-                    return
+        Task {
+            do {
+                try await sut.start(
+                    updateStep: 0.1,
+                    finishTime: 0.3
+                ) { notifier in
+                    notifier.addSubscriber(environment) { _ in
+                        if environment.isFirstTimerCalledOnce {
+                            return
+                        }
+                        environment.isFirstTimerCall = true
+                        environment.isFirstTimerCalledOnce = true
+                        expectation.fulfill()
+                    }
                 }
-                environment.isFirstTimerCall = true
-                environment.isFirstTimerCalledOnce = true
-                expectation.fulfill()
+            } catch let error {
+                XCTFail(error.localizedDescription)
             }
-            .store(in: &environment.cancellables)
-        }
-        sut.start(updateStep: 0.1,
-                  finishTime: 0.3) { notifier in
-            notifier.sink { _ in
-                if environment.isSecondTimerCalledOnce {
-                    return
+            do {
+                try await sut.start(
+                    updateStep: 0.1,
+                    finishTime: 0.3
+                ) { notifier in
+                    notifier.addSubscriber(environment) { _ in
+                        if environment.isSecondTimerCalledOnce {
+                            return
+                        }
+                        environment.isSecondTimerCall = true
+                        environment.isSecondTimerCalledOnce = true
+                    }
                 }
-                environment.isSecondTimerCall = true
-                environment.isSecondTimerCalledOnce = true
-            }
-            .store(in: &environment.cancellables)
+            } catch {}
         }
         // Then
         wait(for: [expectation], timeout: 0.3)
@@ -65,24 +83,41 @@ final class ProgressTimerTests: XCTestCase {
         // Given
         let environment = Environment()
         let sut = environment.makeSut()
+        let expectation = expectation(description: #function)
         // When
-        sut.start(updateStep: 0.1,
-                  finishTime: 0.3) { _ in }
-        sut.stop()
-        XCTAssertFalse(sut.isActive)
-        sut.stop()
+        Task {
+            do {
+                try await sut.start(
+                    updateStep: 0.1,
+                    finishTime: 0.3
+                ) { _ in }
+                environment.isActive = await sut.isActive
+                XCTAssertTrue(environment.isActive)
+                try await sut.stop()
+            } catch let error {
+                XCTFail(error.localizedDescription)
+            }
+            environment.isActive = await sut.isActive
+            do {
+                try await sut.stop()
+            } catch {}
+            environment.isActive = await sut.isActive
+            expectation.fulfill()
+        }
         // Then
-        XCTAssertFalse(sut.isActive)
+        wait(for: [expectation], timeout: 1)
+        XCTAssertFalse(environment.isActive)
     }
 }
 
-private final class Environment {
+private final class Environment: Sendable {
     
-    var cancellables = Set<AnyCancellable>()
-    var isFirstTimerCall = false
-    var isFirstTimerCalledOnce = false
-    var isSecondTimerCall = false
-    var isSecondTimerCalledOnce = false
+    nonisolated(unsafe) var isActive = false
+    
+    nonisolated(unsafe) var isFirstTimerCall = false
+    nonisolated(unsafe) var isFirstTimerCalledOnce = false
+    nonisolated(unsafe) var isSecondTimerCall = false
+    nonisolated(unsafe) var isSecondTimerCalledOnce = false
     
     func makeSut() -> ProgressTimer {
         return ProgressTimer()

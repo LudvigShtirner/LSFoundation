@@ -1,10 +1,3 @@
-//
-//  ResultUtilsTests.swift
-//
-//
-//  Created by Алексей Филиппов on 29.09.2024.
-//
-
 // SPM
 import LSFoundation
 // Apple

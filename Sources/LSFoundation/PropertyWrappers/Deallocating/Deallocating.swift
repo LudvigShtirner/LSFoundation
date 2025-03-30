@@ -1,12 +1,4 @@
-//
-//  Deallocating.swift
-//
-//
-//  Created by Алексей Филиппов on 12.11.2024.
-//
-
 import Foundation
-import Combine
 
 @propertyWrapper @dynamicMemberLookup
 public final class Deallocating<Value: AnyObject & Sendable> {
@@ -29,12 +21,5 @@ public final class Deallocating<Value: AnyObject & Sendable> {
  
     deinit {
         LeakDetection.expectDeallocation(wrappedValue, in: timeInterval)
-    }
-}
-
-extension Deallocating: ObservableObject where Value: ObservableObject {
-
-    public var objectWillChange: Value.ObjectWillChangePublisher {
-        wrappedValue.objectWillChange
     }
 }

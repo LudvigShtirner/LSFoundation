@@ -1,10 +1,3 @@
-//
-//  BlockRename.swift
-//  SupportCode
-//
-//  Created by Алексей Филиппов on 27.12.2020.
-//
-
 // Apple
 import Foundation
 

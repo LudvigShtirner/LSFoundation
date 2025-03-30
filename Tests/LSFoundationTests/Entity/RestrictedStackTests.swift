@@ -1,10 +1,3 @@
-//
-//  RestrictedStackTests.swift
-//  
-//
-//  Created by Алексей Филиппов on 23.02.2023.
-//
-
 // Apple
 import XCTest
 // SPM

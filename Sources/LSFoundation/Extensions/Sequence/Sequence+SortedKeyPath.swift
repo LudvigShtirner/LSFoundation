@@ -1,10 +1,3 @@
-//
-//  Sequence+SortedKeyPath.swift
-//  
-//
-//  Created by Алексей Филиппов on 01.01.2023.
-//
-
 // Apple
 import Foundation
 

@@ -1,10 +1,3 @@
-//
-//  String+RTL.swift
-//
-//
-//  Created by Алексей Филиппов on 24.04.2024.
-//
-
 // Apple
 import Foundation
 

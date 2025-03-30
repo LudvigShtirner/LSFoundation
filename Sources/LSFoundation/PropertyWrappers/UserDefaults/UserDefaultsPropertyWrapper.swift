@@ -1,13 +1,5 @@
-//
-//  UserDefaultsPropertyWrapper.swift
-//  SupportCode
-//
-//  Created by Филиппов Алексей on 12.05.2022.
-//
-
 // Apple
 import Foundation
-import Combine
 
 /// Property wrapper for userDefaults. Store and obtain data
 @propertyWrapper
@@ -64,24 +56,24 @@ public struct UDCodableStored<T: JsonCodable> {
 }
 
 @propertyWrapper
-public struct UDStoredRx<T: Codable> {
+public struct UDStoredRx<T: Codable & Sendable> {
     public var wrappedValue: T {
         get {
             storage.object(forKey: key.stringValue) as? T ?? defaultValue
         }
         set {
             storage.set(newValue, forKey: key.stringValue)
-            currentValue.send(newValue)
+            currentValue.wrappedValue = newValue
         }
     }
     
     public var projectedValue: Self { self }
-    public var publisher: CurrentValueSubject<T, Never> { currentValue }
+    public var publisher: ObservableValue<T> { currentValue }
     
     private let key: UserDefaultsKey
     private let defaultValue: T
     private let storage: UserDefaults
-    private let currentValue: CurrentValueSubject<T, Never>
+    private let currentValue: ObservableValue<T>
     
     public init(key: UserDefaultsKey,
                 defaultValue: T,
@@ -89,12 +81,12 @@ public struct UDStoredRx<T: Codable> {
         self.key = key
         self.defaultValue = defaultValue
         self.storage = storage
-        self.currentValue = .init(defaultValue)
+        self.currentValue = ObservableValue(value: defaultValue)
     }
 }
 
 @propertyWrapper
-public struct UDCodableStoredRx<T: JsonCodable> {
+public struct UDCodableStoredRx<T: JsonCodable & Sendable> {
     public var wrappedValue: T {
         get {
             guard let data = storage.data(forKey: key.stringValue) else {
@@ -105,15 +97,15 @@ public struct UDCodableStoredRx<T: JsonCodable> {
         set {
             let data = try! newValue.encode()
             storage.set(data, forKey: key.stringValue)
-            currentValue.send(newValue)
+            currentValue.wrappedValue = newValue
         }
     }
-    public var publisher: AnyPublisher<T, Never> { currentValue.eraseToAnyPublisher() }
+    public var publisher: ObservableValue<T> { currentValue }
     
     private let key: UserDefaultsKey
     private let defaultValue: T
     private let storage: UserDefaults
-    private let currentValue: CurrentValueSubject<T, Never>
+    private let currentValue: ObservableValue<T>
     
     public init(key: UserDefaultsKey,
                 defaultValue: T,
@@ -121,6 +113,6 @@ public struct UDCodableStoredRx<T: JsonCodable> {
         self.key = key
         self.defaultValue = defaultValue
         self.storage = storage
-        self.currentValue = .init(defaultValue)
+        self.currentValue = ObservableValue(value: defaultValue)
     }
 }

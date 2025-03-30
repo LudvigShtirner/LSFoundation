@@ -1,10 +1,3 @@
-//
-//  StringIdentifierTests.swift
-//
-//
-//  Created by Алексей Филиппов on 15.07.2024.
-//
-
 // Apple
 import XCTest
 

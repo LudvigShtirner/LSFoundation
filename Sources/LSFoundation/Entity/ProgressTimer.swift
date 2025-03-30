@@ -1,13 +1,11 @@
 // Apple
 import Foundation
-import Combine
 
 /// Provides progress updates by time interval.
 /// - Important: Blocks non-main thread
-public final class ProgressTimer {
+public final class ProgressTimer: Sendable {
     // MARK: - Data
     private let state: ProgressTimerState
-    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Inits
     public init() {
@@ -15,56 +13,45 @@ public final class ProgressTimer {
     }
     
     // MARK: - Interface methods
-    public var isActive: Bool { state.isActive }
+    public var isActive: Bool {
+        get async { await state.isActive }
+    }
     
     /// Launches timer with updates by time intervals with overall time
     /// - Parameters:
     ///   - updateStep: Time interval between updates fired
     ///   - finishTime: duration of timer work
     ///   - handle: configuration block with progress publisher
-    public func start(updateStep: TimeInterval,
-                      finishTime: TimeInterval,
-                      handle: (CurrentValueSubject<Double, Never>) -> Void) {
-        guard let idle = state.idle else {
-            return
-        }
-        let running = idle.makeRunning(updateStep: updateStep,
-                                       finishTime: finishTime)
-        self.state.running = running
-        running.progress
-            .sink { [weak self] progress in
-                if progress / finishTime >= 1.0 {
-                    self?.stop()
+    public func start(
+        updateStep: TimeInterval,
+        finishTime: TimeInterval,
+        handle: (ObservableValue<Double>) -> Void
+    ) async throws {
+        let running = try await state.makeRunning(
+            updateStep: updateStep,
+            finishTime: finishTime
+        )
+        running.progress.addSubscriber(self) { [weak self] progress in
+            if progress / finishTime >= 1.0 {
+                Task {
+                    try await self?.stop()
                 }
             }
-            .store(in: &cancellables)
+        }
         handle(running.progress)
         running.start()
     }
     
     /// invalidate timer and stop publishing updates
-    public func stop() {
-        guard let timer = state.running else {
-            return
-        }
-        state.idle = timer.stop()
+    public func stop() async throws {
+        try await state.makeIdle()
     }
 }
 
 // MARK: - State
-private final class ProgressTimerState {
-    var idle: IdleProgressTimer? {
-        didSet {
-            guard idle != nil else { return }
-            running = nil
-        }
-    }
-    var running: RunningProgressTimer? {
-        didSet {
-            guard running != nil else { return }
-            idle = nil
-        }
-    }
+private actor ProgressTimerState {
+    var idle: IdleProgressTimer?
+    var running: RunningProgressTimer?
     
     init() {
         idle = IdleProgressTimer()
@@ -74,10 +61,37 @@ private final class ProgressTimerState {
         guard running != nil else { return false }
         return true
     }
+    
+    func makeIdle() throws {
+        guard let timer = running else {
+            throw ProgressTimerError.alreadyStopped
+        }
+        self.idle = timer.stop()
+        self.running = nil
+    }
+    
+    func makeRunning(
+        updateStep: TimeInterval,
+        finishTime: TimeInterval
+    ) throws -> RunningProgressTimer {
+        guard let idle else {
+            throw ProgressTimerError.alreadyRunning
+        }
+        let running = idle.makeRunning(updateStep: updateStep,
+                                       finishTime: finishTime)
+        self.running = running
+        self.idle = nil
+        return running
+    }
+}
+
+enum ProgressTimerError: Error {
+    case alreadyStopped
+    case alreadyRunning
 }
 
 // MARK: - Idle
-private struct IdleProgressTimer {
+private struct IdleProgressTimer: Sendable {
     // MARK: - Interface methods
     func makeRunning(updateStep: TimeInterval,
                      finishTime: TimeInterval) -> RunningProgressTimer {
@@ -87,14 +101,14 @@ private struct IdleProgressTimer {
 }
 
 // MARK: - Running
-private final class RunningProgressTimer {
+private final class RunningProgressTimer: Sendable {
     // MARK: - Data
     private let updateStep: TimeInterval
     private let finishTime: TimeInterval
-    private var timer: Timer!
+    nonisolated(unsafe) private var timer: Timer!
     
-    let progress: CurrentValueSubject<Double, Never> = .init(0)
-    private var shouldKeepRunning = false
+    let progress = ObservableValue<Double>(value: 0)
+    nonisolated(unsafe) private var shouldKeepRunning = false
     
     // MARK: - Life cycle
     init(updateStep: TimeInterval,
@@ -129,7 +143,8 @@ private final class RunningProgressTimer {
     // MARK: - Private methods
     @objc
     private func timerTick() {
-        progress.value += updateStep
+        progress.wrappedValue += updateStep
+        keepRunning()
     }
     
     private func keepRunning() {
@@ -142,9 +157,8 @@ private final class RunningProgressTimer {
     
     @objc
     private func keepingActive() {
-        while shouldKeepRunning {
+        if shouldKeepRunning {
             RunLoop.current.run(until: Date.now.advanced(by: updateStep * 2))
-            keepingActive()
         }
     }
 }

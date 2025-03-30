@@ -1,10 +1,3 @@
-//
-//  MirrorObjectTests.swift
-//
-//
-//  Created by Алексей Филиппов on 20.07.2024.
-//
-
 // SPM
 import LSFoundation
 // Apple

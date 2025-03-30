@@ -1,10 +1,3 @@
-//
-//  Restricted.swift
-//
-//
-//  Created by Алексей Филиппов on 24.11.2023.
-//
-
 // Apple
 import Foundation
 

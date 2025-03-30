@@ -1,10 +1,3 @@
-//
-//  Result+VoidSuccess.swift
-//  SupportCode
-//
-//  Created by Алексей Филиппов on 11.04.2021.
-//
-
 // Apple
 import Foundation
 

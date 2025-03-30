@@ -1,10 +1,3 @@
-//
-//  Cached.swift
-//
-//
-//  Created by Алексей Филиппов on 03.05.2024.
-//
-
 // Apple
 import Foundation
 

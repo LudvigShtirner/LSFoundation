@@ -1,10 +1,3 @@
-//
-//  ProxyWithAction.swift
-//  
-//
-//  Created by Алексей Филиппов on 04.04.2024.
-//
-
 // Apple
 import Foundation
 
