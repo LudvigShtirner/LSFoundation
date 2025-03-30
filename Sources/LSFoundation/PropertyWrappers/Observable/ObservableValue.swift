@@ -54,13 +54,18 @@ public final class ObservableValue<ValueType: Sendable>: Sendable {
     }
     
     private func notify() {
-        
+        Task {
+            let (subscribers, value) = await state.getSubscribersAndValue()
+            subscribers.forEach {
+                $0.notifyBlock(value)
+            }
+        }
     }
 }
 
 private actor ObservableState<ValueType> {
     var value: ValueType
-    var subscribers: [Subscription<ValueType>] = []
+    private var subscribers: [Subscription<ValueType>] = []
     
     init(value: ValueType) {
         self.value = value
@@ -73,7 +78,7 @@ private actor ObservableState<ValueType> {
     func addSubscriber(
         _ subscriber: AnyObject,
         notifyOnSubscribe: Bool,
-        block: @escaping (ValueType) -> Void
+        block: @Sendable @escaping (ValueType) -> Void
     ) {
         let subscription = Subscription(
             subscriber: subscriber,
@@ -92,15 +97,20 @@ private actor ObservableState<ValueType> {
     func removeAllSubscribers() {
         subscribers = []
     }
+    
+    func getSubscribersAndValue() -> ([Subscription<ValueType>], ValueType) {
+        subscribers.removeAll(where: { $0.isInvalid })
+        return (subscribers, value)
+    }
 }
 
-private struct Subscription<ValueType> {
-    weak var subscriber: AnyObject?
-    let notifyBlock: (ValueType) -> Void
+private struct Subscription<ValueType>: Sendable {
+    nonisolated(unsafe) weak var subscriber: AnyObject?
+    let notifyBlock: @Sendable (ValueType) -> Void
     
     init(
         subscriber: AnyObject,
-        block: @escaping (ValueType) -> Void
+        block: @Sendable @escaping (ValueType) -> Void
     ) {
         self.subscriber = subscriber
         self.notifyBlock = block
