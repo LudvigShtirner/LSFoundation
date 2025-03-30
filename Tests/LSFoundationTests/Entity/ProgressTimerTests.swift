@@ -9,26 +9,19 @@ final class ProgressTimerTests: XCTestCase {
         // Given
         let environment = Environment()
         let sut = environment.makeSut()
-        let expectation = expectation(description: #function)
         // When
-        Task {
-            let isActive = await sut.isActive
-            XCTAssertFalse(isActive)
-            do {
-                try await sut.start(
-                    updateStep: 0.1,
-                    finishTime: 0.3,
-                    handle: { _ in }
-                )
-            } catch let error {
-                XCTFail(error.localizedDescription)
-            }
-            environment.isActive = await sut.isActive
-            XCTAssertTrue(environment.isActive)
-            expectation.fulfill()
-        }
+        let isActive = sut.isActive
+        XCTAssertFalse(isActive)
+        XCTAssertNoThrow(
+            try sut.start(
+                updateStep: 0.1,
+                finishTime: 0.3,
+                handle: { _ in }
+            )
+        )
+        environment.isActive = sut.isActive
+        XCTAssertTrue(environment.isActive)
         // Then
-        wait(for: [expectation], timeout: 1)
         XCTAssertTrue(environment.isActive)
     }
     
@@ -38,39 +31,35 @@ final class ProgressTimerTests: XCTestCase {
         let sut = environment.makeSut()
         let expectation = expectation(description: #function)
         // When
-        Task {
-            do {
-                try await sut.start(
-                    updateStep: 0.1,
-                    finishTime: 0.3
-                ) { notifier in
-                    notifier.addSubscriber(environment) { _ in
-                        if environment.isFirstTimerCalledOnce {
-                            return
-                        }
-                        environment.isFirstTimerCall = true
-                        environment.isFirstTimerCalledOnce = true
-                        expectation.fulfill()
+        XCTAssertNoThrow(
+            try sut.start(
+                updateStep: 0.1,
+                finishTime: 0.3
+            ) { notifier in
+                notifier.addSubscriber(environment) { _ in
+                    if environment.isFirstTimerCalledOnce {
+                        return
                     }
+                    environment.isFirstTimerCall = true
+                    environment.isFirstTimerCalledOnce = true
+                    expectation.fulfill()
                 }
-            } catch let error {
-                XCTFail(error.localizedDescription)
             }
-            do {
-                try await sut.start(
-                    updateStep: 0.1,
-                    finishTime: 0.3
-                ) { notifier in
-                    notifier.addSubscriber(environment) { _ in
-                        if environment.isSecondTimerCalledOnce {
-                            return
-                        }
-                        environment.isSecondTimerCall = true
-                        environment.isSecondTimerCalledOnce = true
+        )
+        XCTAssertThrowsError(
+            try sut.start(
+                updateStep: 0.1,
+                finishTime: 0.3
+            ) { notifier in
+                notifier.addSubscriber(environment) { _ in
+                    if environment.isSecondTimerCalledOnce {
+                        return
                     }
+                    environment.isSecondTimerCall = true
+                    environment.isSecondTimerCalledOnce = true
                 }
-            } catch {}
-        }
+            }
+        )
         // Then
         wait(for: [expectation], timeout: 0.3)
         XCTAssertTrue(environment.isFirstTimerCalledOnce)
@@ -83,29 +72,24 @@ final class ProgressTimerTests: XCTestCase {
         // Given
         let environment = Environment()
         let sut = environment.makeSut()
-        let expectation = expectation(description: #function)
         // When
-        Task {
-            do {
-                try await sut.start(
-                    updateStep: 0.1,
-                    finishTime: 0.3
-                ) { _ in }
-                environment.isActive = await sut.isActive
-                XCTAssertTrue(environment.isActive)
-                try await sut.stop()
-            } catch let error {
-                XCTFail(error.localizedDescription)
-            }
-            environment.isActive = await sut.isActive
-            do {
-                try await sut.stop()
-            } catch {}
-            environment.isActive = await sut.isActive
-            expectation.fulfill()
-        }
+        XCTAssertNoThrow(
+            try sut.start(
+                updateStep: 0.1,
+                finishTime: 0.3
+            ) { _ in }
+        )
+        environment.isActive = sut.isActive
+        XCTAssertTrue(environment.isActive)
+        XCTAssertNoThrow(
+            try sut.stop()
+        )
+        environment.isActive = sut.isActive
+        XCTAssertThrowsError(
+            try sut.stop()
+        )
+        environment.isActive = sut.isActive
         // Then
-        wait(for: [expectation], timeout: 1)
         XCTAssertFalse(environment.isActive)
     }
 }

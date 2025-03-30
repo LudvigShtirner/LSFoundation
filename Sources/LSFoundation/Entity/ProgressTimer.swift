@@ -6,6 +6,7 @@ import Foundation
 public final class ProgressTimer: Sendable {
     // MARK: - Data
     private let state: ProgressTimerState
+    private let lock = NSLock()
     
     // MARK: - Inits
     public init() {
@@ -13,9 +14,7 @@ public final class ProgressTimer: Sendable {
     }
     
     // MARK: - Interface methods
-    public var isActive: Bool {
-        get async { await state.isActive }
-    }
+    public var isActive: Bool { lock.withLock { state.isActive } }
     
     /// Launches timer with updates by time intervals with overall time
     /// - Parameters:
@@ -26,16 +25,16 @@ public final class ProgressTimer: Sendable {
         updateStep: TimeInterval,
         finishTime: TimeInterval,
         handle: (ObservableValue<Double>) -> Void
-    ) async throws {
-        let running = try await state.makeRunning(
-            updateStep: updateStep,
-            finishTime: finishTime
-        )
+    ) throws {
+        let running = try lock.withLock {
+            try state.makeRunning(
+                updateStep: updateStep,
+                finishTime: finishTime
+            )
+        }
         running.progress.addSubscriber(self) { [weak self] progress in
             if progress / finishTime >= 1.0 {
-                Task {
-                    try await self?.stop()
-                }
+                try? self?.stop()
             }
         }
         handle(running.progress)
@@ -43,24 +42,23 @@ public final class ProgressTimer: Sendable {
     }
     
     /// invalidate timer and stop publishing updates
-    public func stop() async throws {
-        try await state.makeIdle()
+    public func stop() throws {
+        try lock.withLock {
+            try state.makeIdle()
+        }
     }
 }
 
 // MARK: - State
-private actor ProgressTimerState {
-    var idle: IdleProgressTimer?
-    var running: RunningProgressTimer?
+private final class ProgressTimerState: Sendable {
+    nonisolated(unsafe) var idle: IdleProgressTimer?
+    nonisolated(unsafe) var running: RunningProgressTimer?
     
     init() {
         idle = IdleProgressTimer()
     }
     
-    var isActive: Bool {
-        guard running != nil else { return false }
-        return true
-    }
+    var isActive: Bool { running != nil }
     
     func makeIdle() throws {
         guard let timer = running else {
