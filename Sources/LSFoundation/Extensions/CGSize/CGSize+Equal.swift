@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension CGSize {
     /// Correct method for size comparison
     /// - Parameter other: other size

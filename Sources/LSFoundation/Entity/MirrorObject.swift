@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Mirror provider model
 open class MirrorObject {
     // MARK: - Data

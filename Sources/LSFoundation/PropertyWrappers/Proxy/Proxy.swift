@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 @propertyWrapper
 public struct AnyProxy<EnclosingType, Value> {
     // MARK: - Data

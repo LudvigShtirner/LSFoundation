@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public protocol JsonCodable: Codable {
     func encode() throws -> Data
     static func decode(from data: Data) throws -> Self

@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public typealias VoidBlock = () -> Void
 public typealias BoolBlock = (Bool) -> Void
 public typealias IntBlock = (Int) -> Void

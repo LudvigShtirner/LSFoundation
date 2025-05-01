@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension CGRect {
     func isAlmostEqual(to other: CGRect) -> Bool {
         size.isAlmostEqual(to: other.size) 

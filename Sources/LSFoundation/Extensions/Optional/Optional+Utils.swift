@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Optional {
     var isNil: Bool {
         switch self {

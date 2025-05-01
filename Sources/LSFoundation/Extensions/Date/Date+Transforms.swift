@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Date {
     func createWithFirstSecondsOfDay(calendar: Calendar = .current) -> Date {
         calendar.startOfDay(for: self)

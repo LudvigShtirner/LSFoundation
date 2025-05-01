@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension DateFormatter {
     // MARK: - Inits
     static let shared = DateFormatter()

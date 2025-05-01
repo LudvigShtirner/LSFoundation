@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Comparable {
     func moreOrEqual(_ min: Self) -> Self {
         max(self, min)

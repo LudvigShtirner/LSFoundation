@@ -1,5 +1,3 @@
-import Foundation
-
 @propertyWrapper @dynamicMemberLookup
 public final class Deallocating<Value: AnyObject & Sendable> {
     public var wrappedValue: Value

@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Provides progress updates by time interval.
 /// - Important: Blocks non-main thread
 public final class ProgressTimer: Sendable {

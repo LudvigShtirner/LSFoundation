@@ -1,5 +1,3 @@
-import Foundation
-
 public extension String {
     static func emojiFlag(countryCode: String) -> String? {
         guard countryCode.count == 2 else {

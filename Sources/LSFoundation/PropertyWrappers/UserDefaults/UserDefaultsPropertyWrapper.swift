@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Property wrapper for userDefaults. Store and obtain data
 @propertyWrapper
 public struct UDStored<T: Codable> {

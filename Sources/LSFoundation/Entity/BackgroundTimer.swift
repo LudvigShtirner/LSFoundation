@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Timer that works correctly outside of main thread or RunLoop.main
 public final class BackgroundTimer {
     // MARK: - Subtypes

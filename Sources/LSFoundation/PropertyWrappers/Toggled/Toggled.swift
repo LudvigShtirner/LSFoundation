@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 @propertyWrapper
 public struct Toggled<Value> {
     // MARK: - Data

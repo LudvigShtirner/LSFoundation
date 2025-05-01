@@ -1,5 +1,3 @@
-import Foundation
-
 public typealias TransformClosure<Element, Result> = (Element) async -> Result
 
 public extension Sequence {

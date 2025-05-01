@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension BinaryFloatingPoint {
     /// Correct method for float comparison
     /// - Parameter other: value to compare

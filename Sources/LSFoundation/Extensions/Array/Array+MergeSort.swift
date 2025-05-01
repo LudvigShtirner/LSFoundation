@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Array where Element: Comparable {
     // MARK: - Interface methods
     /// Merge sort

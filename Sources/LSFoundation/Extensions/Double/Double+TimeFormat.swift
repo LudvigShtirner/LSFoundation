@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Double {
     /// Converts to "hh:mm:ss"
     /// - Returns: "hh:mm:ss" or "mm:ss" when less than hour

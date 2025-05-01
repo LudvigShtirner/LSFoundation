@@ -1,9 +1,4 @@
-// Apple
-import Foundation
-
-/// Расширение для улучшения читаемости Result с типом успеха Void
 public extension Result where Success == Void {
-    /// Успех без возвращаемого значения
     static var success: Result {
         return Result.success(())
     }

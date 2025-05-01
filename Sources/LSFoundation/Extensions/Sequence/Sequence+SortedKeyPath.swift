@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Sequence {
     /// Сортирует элементы используя KeyPath
     /// - Parameter keyPath: keyPath по которому необходимо отсортировать элементы

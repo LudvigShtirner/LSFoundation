@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension String {
     var isRTL: Bool {
         guard !isEmpty else { return false }

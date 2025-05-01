@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 @propertyWrapper
 public final class Atomic<Value>: @unchecked Sendable {
     // MARK: - Data

@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /**
  Restricted collection
  */

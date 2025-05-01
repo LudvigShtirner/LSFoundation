@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Provides easy way to obtain className for all NSObject inheritors
 public protocol ClassIdentifiable {
     static var className: String { get }

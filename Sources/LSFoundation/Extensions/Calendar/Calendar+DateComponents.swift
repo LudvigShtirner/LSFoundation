@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension Calendar {
     /// Extract year from date
     /// - Parameter date: Direct date

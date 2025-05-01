@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /// Container with weak value
 public final class WeakBox<T: AnyObject> {
     // MARK: - Data

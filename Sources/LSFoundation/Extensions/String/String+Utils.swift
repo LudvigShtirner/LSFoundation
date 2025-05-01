@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public extension String {
     /// Renamed count property
     var length: Int {

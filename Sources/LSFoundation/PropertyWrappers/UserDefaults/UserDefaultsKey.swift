@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 public struct UserDefaultsKey: ExpressibleByStringLiteral {
     // MARK: - Data
     let stringValue: String

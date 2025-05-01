@@ -1,6 +1,3 @@
-// Apple
-import Foundation
-
 /**
  Protocol of localization resource
  
