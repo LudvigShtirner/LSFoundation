@@ -12,13 +12,13 @@ class AtomicTests: XCTestCase {
     // MARK: - Tests
     func testThatIntIsAtomic() {
         // Given
-        @Atomic var intValue = 0
+        let intValue = Atomic(Int.zero)
         let group = DispatchGroup()
         // When
         for _ in stride(from: 0, to: 100, by: 1) {
             group.enter()
             queue.async {
-                $intValue.mutate { value in
+                intValue.withLock { value in
                     value += 1
                 }
                 group.leave()
@@ -27,18 +27,18 @@ class AtomicTests: XCTestCase {
         group.wait()
 
         // Then
-        XCTAssertEqual(intValue, 100)
+        XCTAssertEqual(intValue.withLock { $0 }, 100)
     }
     
     func testThatDictIsAtomic() {
         // Given
-        @Atomic var dictValue = [:]
+        let dictValue = Atomic<[String: Sendable]>([:])
         let group = DispatchGroup()
         // When
         for i in stride(from: 0, to: 100, by: 1) {
             group.enter()
             queue.async {
-                $dictValue.mutate { value in
+                dictValue.withLock { value in
                     value["\(i)"] = i
                 }
                 group.leave()
@@ -47,6 +47,6 @@ class AtomicTests: XCTestCase {
         group.wait()
 
         // Then
-        XCTAssertEqual(dictValue.count, 100)
+        XCTAssertEqual(dictValue.withLock { $0.count }, 100)
     }
 }

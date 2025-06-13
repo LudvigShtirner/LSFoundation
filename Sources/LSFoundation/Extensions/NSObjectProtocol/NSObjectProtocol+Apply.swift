@@ -1,6 +1,6 @@
 extension NSObjectProtocol {
     @discardableResult
-    public func apply(_ closure: @escaping (Self) -> Void) -> Self {
+    public func apply(_ closure: (Self) -> Void) -> Self {
         closure(self)
         return self
     }

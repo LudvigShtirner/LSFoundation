@@ -1,32 +1,29 @@
-@propertyWrapper
-public final class Atomic<Value>: @unchecked Sendable {
+public final class Atomic<Value: Sendable>: Sendable {
     // MARK: - Data
     private let lock = NSLock()
-    private var value: Value
+    private nonisolated(unsafe) var value: Value
     
     // MARK: - Inits
-    public init(wrappedValue: Value) {
-        self.value = wrappedValue
+    public init(_ value: Value) {
+        self.value = value
     }
     
     // MARK: - Interface methods
-    public var projectedValue: Atomic<Value> { self }
     
-    public var wrappedValue: Value {
-        get {
-            lock.lock()
-            let result = value
-            lock.unlock()
-            return result
-        }
-        set {
-            assertionFailure("use mutate func instead")
-        }
+    public func withLock<R>(_ body: @Sendable (inout Value) -> R) -> R where R : Sendable {
+        lock.withLock { body(&value) }
     }
     
-    public func mutate(_ mutation: (inout Value) -> Void) {
-        lock.lock()
-        mutation(&value)
-        lock.unlock()
+    public func withLockUnchecked<R>(_ body: (inout Value) -> R) -> R {
+        lock.withLock { body(&value) }
+    }
+    
+    // throwable version of functions above
+    public func withLock<R>(_ body: @Sendable (inout Value) throws -> R) rethrows -> R where R : Sendable {
+        try lock.withLock { try body(&value) }
+    }
+    
+    public func withLockUnchecked<R>(_ body: (inout Value) throws -> R) rethrows -> R {
+        try lock.withLock { try body(&value) }
     }
 }
